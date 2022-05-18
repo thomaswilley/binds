@@ -1,2 +1,4 @@
 # binds
-drop-in and extremely lightweight html5 data binding framework
+drop-in compact html5 data binding framework
+
+see index.html

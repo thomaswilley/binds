@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <title>binds.js reference</title>
+    <script src="binds.js"></script>
+  <script>
+    var dobj = {
+      'todo': ['this thing', 'that thing',],
+    };
+    document.addEventListener("DOMContentLoaded", async(event) => {
+      await loadBinds();
+    });
+  </script>
+  </head>
+  <body>
+    <h1>binds.js</h1>
+    <h3>a drop-in compact binding framework for web apps and dapps making heavy use of eval
+      <br/>
+      <a href="https://github.com/thomaswilley/binds">Github Repo</a>
+    </h3>
+    <h3>Data (editable, change triggered on blur)</h3>
+    <textarea cols="80" id="rawdata" class="_bound_" data-object="dobj" data-updatedby="self" data-template="(value) => { return document.createTextNode(JSON.stringify(value)); }" contentEditable>
+    </textarea>
+    <h3>Dynamic bind</h5>
+    <ul class="_bound_" data-updatedby="rawdata" data-object="dobj.todo" data-filter="el" data-template="(todo) => { var _newitem=document.createElement('li');_newitem.append(document.createTextNode(todo)); return _newitem; }">
+    </ul>
+    <h3>Static bind (set on load)</h3>
+    <ul class="_bound_" data-object="dobj.todo" data-filter="el" data-template="(todo) => { var _newitem=document.createElement('li');_newitem.append(document.createTextNode(todo)); return _newitem; }">
+    </ul>
+    <hr>
+    <h3>Syntax</h3>
+    To bind a field to an object, add the special "<b>_bound_</b>" class and data-* attributes to it.
+    <ul>
+      <li><b>data-updatedby:</b> the id of the html field (todo: array of them) which, onChanged, will trigger this element to re-render. you can use "self" to update the bound object with the value of this element</li>
+      <li><b>data-object:</b> the json object this field binds to</li>
+      <li><b>data-filter:</b> the subset of the object to bind to. for now, you can use "el" to return the object itself.</li>
+      <li><b>data-template:</b> return the html to be applied to all elements returned from the filter on the object</li>
+    </ul>
+    <p style="margin-top: 2rem;">
+    &copy; thomaswilley, 2022
+    </p>
+  </body>
+</html>
+
