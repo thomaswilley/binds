@@ -2,43 +2,109 @@
 <html>
   <head>
     <title>binds.js reference</title>
+    <script src="observableslim.min.js"></script>
     <script src="binds.js"></script>
-  <script>
-    var dobj = {
-      'todo': ['this thing', 'that thing',],
-    };
-    document.addEventListener("DOMContentLoaded", async(event) => {
-      await loadBinds();
-    });
-  </script>
+    <script>
+      var db = {
+        name: 'binds.js',
+        title: 'minimalist one-way data binding which tries to stay out of the way.',
+        repo: 'https://github.com/thomaswilley/binds',
+        foo: 'bar',
+        fields: {
+          'data-bind': 'selector: the object ($OBJECT for this doc purposes) this element will be bound to.',
+          'data-selector': 'selector[string]||bind to $OBJECT[selector]',
+          'data-evalselector': 'selector||function: bind to $OBJECT[eval(selector)]',
+          'data-filter': 'selector||function: bind to $OBJECT.filter, useful for calling .map/.reduce/etc on binds',
+          'data-trailingfilter': 'selector||function: same as data-filter except applied last, useful for chaining filters',
+          'data-rootonlyopwrap': 'function: apply function to $OBJECT, useful for e.g., Object.entries($OBJECT)',
+          'data-opwrap': 'function: same as rootonlyopwrap exept applies to entire chain of filters & selectors (except trailing filter)',
+          'data-debug': 'boolean: show debug info in console on render',
+          'data-forcerender': 'boolean: force binds set within a frag to be rendered upon frag loading',
+          'data-noforcerender': 'boolean: force binds within a forcerendered frag to not render on loading',
+          'data-preprocessor': 'function (Array)[return Array]: preprocess the completed bind results, e.g., useful for restructuring results',
+          'data-postprocessor': 'function (Element,Array)[return Element]: called once just prior to rendering Element to DOM',
+          'data-fragtemplate': 'string:name of fragment html file (e.g., if fragment is in frags/header.html, data-fragtemplate="header")',
+          'data-itemtemplate': 'function: returning formatted html element per element in data-bind. of the form: (item)=>{ return element }',
+        }
+      }
+
+/* convenience helpers */
+let __ = (str) => { return document.createTextNode(str) };
+let _a = (href, str) => { let elA = document.createElement('a'); elA.setAttribute('href',href); elA.appendChild(__(str)); return elA };
+let _row= (colType,colValues) => {
+  let tr = document.createElement('tr');
+  colValues.forEach(colVal => {
+    let elCol = document.createElement(colType);
+    elCol.append(__(colVal));
+    tr.append(elCol);
+  })
+  return tr;
+}
+
+document.addEventListener("DOMContentLoaded", (event) => {
+  loadBinds(window, 'window.db', 'frags/');
+  forceRenderAll();
+});
+    </script>
   </head>
   <body>
-    <h1>binds.js</h1>
-    <h3>a drop-in compact binding framework for web apps and dapps making heavy use of eval
-      <br/>
-      <a href="https://github.com/thomaswilley/binds">Github Repo</a>
-    </h3>
-    <h3>Data (editable, change triggered on blur)</h3>
-    <textarea cols="80" id="rawdata" class="_bound_" data-object="dobj" data-updatedby="self" data-template="(value) => { return document.createTextNode(JSON.stringify(value)); }" contentEditable>
-    </textarea>
-    <h3>Dynamic bind</h5>
-    <ul class="_bound_" data-updatedby="rawdata" data-object="dobj.todo" data-filter="el" data-template="(todo) => { var _newitem=document.createElement('li');_newitem.append(document.createTextNode(todo)); return _newitem; }">
-    </ul>
-    <h3>Static bind (set on load)</h3>
-    <ul class="_bound_" data-object="dobj.todo" data-filter="el" data-template="(todo) => { var _newitem=document.createElement('li');_newitem.append(document.createTextNode(todo)); return _newitem; }">
-    </ul>
-    <hr>
-    <h3>Syntax</h3>
-    To bind a field to an object, add the special "<b>_bound_</b>" class and data-* attributes to it.
+    <h1 data-bind="window.db.name"></h1>
+    <h3 data-bind="window.db.title"></h3>
+    <p data-bind="window.db.repo" data-itemtemplate="(href)=>_a(href,'Github Repo')"></p>
+
+    <hr/>
+    <h3>Simple Example</h3>
+    <div style="margin-bottom: 25px;">
+      <div>
+        <span style="display:inline-block;width: 100px;">markup</span>
+        <code style="padding:0.5rem; border:1px solid black;">
+          &lt;span data-bind="window.db.foo"&gt;you'll only see this if the bind hasn't triggered.&lt;/span&gt;
+        </code>
+      </div>
+      <div>
+        <br/>
+        <span style="display:inline-block;width: 100px;">result</span>
+        <span data-bind="window.db.foo">you'll only see this if the bind hasn't triggered.</span>
+      </div>
+      <div>
+        <br/>
+        <span style="display:inline-block;width: 100px;">window.db.foo</span>
+        <span>
+          <input type="text"></input>
+          <span style="visibility:hidden;" data-bind="window.db.foo"></span>
+  <script>
+    document.addEventListener("DOMContentLoaded", (event) => {
+      let elIn    = document.querySelector('input[type=text]');
+      let elData  = document.querySelector('span[data-bind="window.db.foo"]');
+      let getVal = () => document.querySelector('span[data-bind="window.db.foo"]').innerText;
+      let val = getVal();
+      elIn.value = val;
+      elIn.onkeyup = (event) => { window.db.foo = event.target.value;return false; }
+    });
+  </script>
+        </span>
+      </div>
+    <p>View the source of this page to see more examples.</p>
+    </div>
+
+    <hr/>
+    <h3>Modifiers (Reference)</h3>
+    <table data-bind="window.db.fields" data-opwrap="Object.entries" 
+      data-itemtemplate="fieldEntry=>_row('td',fieldEntry)"
+      data-postprocessor="(el,entries)=>{ let r = _row('th', ['Modifier','Purpose']); el.prepend(r); return el; }">
+    </table>
+
+    <hr/>
+
+    <h3>Get started</h3>
     <ul>
-      <li><b>data-updatedby:</b> the id of the html field (todo: array of them) which, onChanged, will trigger this element to re-render. you can use "self" to update the bound object with the value of this element</li>
-      <li><b>data-object:</b> the json object this field binds to</li>
-      <li><b>data-filter:</b> the subset of the object to bind to. for now, you can use "el" to return the object itself.</li>
-      <li><b>data-template:</b> return the html to be applied to all elements returned from the filter on the object</li>
+      <li>Download and add two scripts to head of your html doc: observableslim.min.js, and binds.js (e.g., from this site or github)</li>
+      <li>loadBinds(object, 'dot-notated json path to object', 'path-to-frags/') initializes the DOM &amp; binds.</li>
+      <li>ObservableSlim is used to create a Proxy object which emits change events which are then batched/monitored to trigger DOM updates via binds.js</li>
+      <li>Frag loading is via AJAX. Frags are standard HTML files which resolve to a single element.</li>
+      <li>Frags are interpolated so they can include variables (e.g., ${variable}) and use interpolation to control display. For example ${ condition ? ` html object on true ` : ` html object on false ` }</li>
+      <li>Interpolation is done via interpolate(templateString, dictionaryOfParameters) which is included in the global namespace by default with binds.js.</li>
     </ul>
-    <p style="margin-top: 2rem;">
-    &copy; thomaswilley, 2022
-    </p>
   </body>
 </html>
 
