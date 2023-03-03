@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <title>binds.js reference</title>
     <script src="observableslim.min.js"></script>
@@ -7,7 +7,12 @@
     <script>
       var db = {
         name: 'binds.js',
-        title: 'minimalist one-way data binding which tries to stay out of the way.',
+        title: 'minimalist one-way data binding that stays out of the way.',
+        punches: [
+          'everything happens through well-defined data attributes (see modifiers table)',
+          'allows you to stick to vanilla html/js(/ts), no new syntax/language to learn',
+          'built-in dynamically loaded templates with interpolation, frags (short for fragments), which are also vanilla html/js',
+        ],
         repo: 'https://github.com/thomaswilley/binds',
         foo: 'bar',
         fields: {
@@ -28,36 +33,27 @@
         }
       }
 
-/* convenience helpers */
-let __ = (str) => { return document.createTextNode(str) };
-let _a = (href, str) => { let elA = document.createElement('a'); elA.setAttribute('href',href); elA.appendChild(__(str)); return elA };
-let _row= (colType,colValues) => {
-  let tr = document.createElement('tr');
-  colValues.forEach(colVal => {
-    let elCol = document.createElement(colType);
-    elCol.append(__(colVal));
-    tr.append(elCol);
-  })
-  return tr;
-}
-
-document.addEventListener("DOMContentLoaded", (event) => {
-  loadBinds(window, 'window.db', 'frags/');
-  forceRenderAll();
-});
+      document.addEventListener("DOMContentLoaded", (event) => {
+        loadBinds(window, 'window.db', 'frags/');
+        forceRenderAll();
+      });
     </script>
   </head>
-  <body>
+  <body style="font-family: monospace;">
     <h1 data-bind="window.db.name"></h1>
     <h3 data-bind="window.db.title"></h3>
+    <ul data-bind="window.db.punches" data-itemtemplate="(punchline)=>{
+                   let li = document.createElement('li');
+                   li.append(__(punchline));
+                   return li; }">
+    </ul>
     <p data-bind="window.db.repo" data-itemtemplate="(href)=>_a(href,'Github Repo')"></p>
-
     <hr/>
     <h3>Simple Example</h3>
     <div style="margin-bottom: 25px;">
       <div>
         <span style="display:inline-block;width: 100px;">markup</span>
-        <code style="padding:0.5rem; border:1px solid black;">
+        <code>
           &lt;span data-bind="window.db.foo"&gt;you'll only see this if the bind hasn't triggered.&lt;/span&gt;
         </code>
       </div>
@@ -72,39 +68,58 @@ document.addEventListener("DOMContentLoaded", (event) => {
         <span>
           <input type="text"></input>
           <span style="visibility:hidden;" data-bind="window.db.foo"></span>
-  <script>
-    document.addEventListener("DOMContentLoaded", (event) => {
-      let elIn    = document.querySelector('input[type=text]');
-      let elData  = document.querySelector('span[data-bind="window.db.foo"]');
-      let getVal = () => document.querySelector('span[data-bind="window.db.foo"]').innerText;
-      let val = getVal();
-      elIn.value = val;
-      elIn.onkeyup = (event) => { window.db.foo = event.target.value;return false; }
-    });
-  </script>
+          <script>
+            document.addEventListener("DOMContentLoaded", (event) => {
+              let elIn    = document.querySelector('input[type=text]');
+              let elData  = document.querySelector('span[data-bind="window.db.foo"]');
+              let getVal = () => document.querySelector('span[data-bind="window.db.foo"]').innerText;
+              let val = getVal();
+              elIn.value = val;
+              elIn.onkeyup = (event) => { window.db.foo = event.target.value;return false; }
+            });
+          </script>
         </span>
       </div>
-    <p>View the source of this page to see more examples.</p>
     </div>
-
-    <hr/>
-    <h3>Modifiers (Reference)</h3>
-    <table data-bind="window.db.fields" data-opwrap="Object.entries" 
-      data-itemtemplate="fieldEntry=>_row('td',fieldEntry)"
-      data-postprocessor="(el,entries)=>{ let r = _row('th', ['Modifier','Purpose']); el.prepend(r); return el; }">
-    </table>
-
-    <hr/>
-
-    <h3>Get started</h3>
-    <ul>
-      <li>Download and add two scripts to head of your html doc: observableslim.min.js, and binds.js (e.g., from this site or github)</li>
-      <li>loadBinds(object, 'dot-notated json path to object', 'path-to-frags/') initializes the DOM &amp; binds.</li>
-      <li>ObservableSlim is used to create a Proxy object which emits change events which are then batched/monitored to trigger DOM updates via binds.js</li>
-      <li>Frag loading is via AJAX. Frags are standard HTML files which resolve to a single element.</li>
-      <li>Frags are interpolated so they can include variables (e.g., ${variable}) and use interpolation to control display. For example ${ condition ? ` html object on true ` : ` html object on false ` }</li>
-      <li>Interpolation is done via interpolate(templateString, dictionaryOfParameters) which is included in the global namespace by default with binds.js.</li>
-    </ul>
+    View the source of this page to see more examples.
+    <br/>
+    <br/>
+    For example, to create the modifier/definition table below:
+    <br/>
+    <code>
+      <pre>
+&lt;table data-bind="window.db.fields" data-opwrap="Object.entries" 
+  data-itemtemplate="fieldEntry=&gt;_row('td',fieldEntry)"
+  data-postprocessor="(el,entries)=&gt;{ let r = _row('th', ['Modifier','Purpose']); el.prepend(r); return el; }"&gt;
+&lt;/table&gt;</pre></code>
+      <hr/>
+      <h3>Modifiers (Reference)</h3>
+      <table data-bind="window.db.fields" data-opwrap="Object.entries" 
+                                          data-itemtemplate="fieldEntry=>_row('td',fieldEntry)"
+                                          data-postprocessor="(el,entries)=>{ let r = _row('th', ['Modifier','Purpose']); el.prepend(r); return el; }">
+      </table>
+      <hr/>
+      <h3>Get started</h3>
+      <div data-bind="window.db.name" data-fragtemplate="getstarted" data-postprocessor="(el,items)=>console.log(el,items)">
+        probably unable to load frag.
+      </div>
+      <script>
+        /* ad-hoc little helpers */
+        let __ = (str) => { return document.createTextNode(str) };
+        let _a = (href, str) => { 
+          let elA = document.createElement('a'); 
+          elA.setAttribute('href',href); 
+          elA.appendChild(__(str)); return elA 
+        };
+        let _row= (colType,colValues) => {
+          let tr = document.createElement('tr');
+          colValues.forEach(colVal => {
+            let elCol = document.createElement(colType);
+            elCol.append(__(colVal));
+            tr.append(elCol);
+          })
+          return tr;
+        }
+      </script>
   </body>
 </html>
-

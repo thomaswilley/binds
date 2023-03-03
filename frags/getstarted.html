@@ -1,0 +1,12 @@
+${ name ? `
+<div>
+  <ul>
+    <li>Download and add two scripts to your html doc: <em>observableslim.min.js and binds.js</em> (e.g., from this site or github)</li>
+    <li>loadBinds(object, 'dot-notated json path to object', 'path-to-frags/') initializes the DOM &amp; binds.</li>
+    <li>ObservableSlim is used to create a Proxy object which emits change events which are then batched/monitored to trigger DOM updates via binds.js</li>
+    <li>Frag loading is via AJAX. Frags are standard HTML files which resolve to a single element.</li>
+    <li>Frags are interpolated so they can include variables and use interpolation to control display.</li>
+    <li>Interpolation is done via interpolate(templateString, dictionaryOfParameters) which is included in the global namespace by default with binds.js.</li>
+  </ul>
+</div>
+` : '' }

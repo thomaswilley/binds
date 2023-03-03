@@ -282,7 +282,8 @@ const renderElement = async (el, path, target) => {
 const getFragTemplate = async (fragPath) => {
   let allowedPassthroughFragTypes = ['svg','html'];
   return new Promise((resolve,reject) => {
-    let key = ethers.utils.hashMessage(fragPath);
+    let key = encodeURI(fragPath);
+    console.log(key);
     if (key in Object.keys(fragMap))
     {
       let frag = fragMap[key];
@@ -323,7 +324,7 @@ function interpolate (str, params) {
     let vals = Object.values(params);
     return new Function(...names, `return \`${str}\`;`)(...vals);
   } catch(err) {
-    //console.log('unable to interpolate.', err, str, params);
+    console.log('unable to interpolate.', err, str, params);
     //fn = new Function('');
   }
   return null;
