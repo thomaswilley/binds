@@ -282,15 +282,11 @@ const renderElement = async (el, path, target) => {
 const getFragTemplate = async (fragPath) => {
   let allowedPassthroughFragTypes = ['svg','html'];
   return new Promise((resolve,reject) => {
-    let key = encodeURI(fragPath);
-    console.log(key);
-    if (key in Object.keys(fragMap))
-    {
-      let frag = fragMap[key];
-      return frag;
-    }
-    else
-    {
+    let key = ethers.utils.id(fragPath);
+		let frag = fragMap[key];
+		if (frag) {
+			resolve(frag);
+		} else {
       fragMap[key] = new Promise((resolve, reject) => {
         if (!allowedPassthroughFragTypes.includes(fragPath.split('.').reverse()[0])) {
           fragPath = fragsBasePath + fragPath + '.html';

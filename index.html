@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
   <head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>binds.js reference</title>
     <script src="observableslim.min.js"></script>
     <script src="binds.js"></script>
@@ -91,7 +93,8 @@
 &lt;table data-bind="window.db.fields" data-opwrap="Object.entries" 
   data-itemtemplate="fieldEntry=&gt;_row('td',fieldEntry)"
   data-postprocessor="(el,entries)=&gt;{ let r = _row('th', ['Modifier','Purpose']); el.prepend(r); return el; }"&gt;
-&lt;/table&gt;</pre></code>
+&lt;/table&gt;
+		</pre></code>
       <hr/>
       <h3>Modifiers (Reference)</h3>
       <table data-bind="window.db.fields" data-opwrap="Object.entries" 
@@ -100,7 +103,7 @@
       </table>
       <hr/>
       <h3>Get started</h3>
-      <div data-bind="window.db.name" data-fragtemplate="getstarted" data-postprocessor="(el,items)=>console.log(el,items)">
+			<div data-bind="window.db.name" data-fragtemplate="getstarted">
         probably unable to load frag.
       </div>
       <script>
